@@ -1,4 +1,5 @@
 from typing import List, Optional, Sequence, Union
+import logging
 
 from asyncpg import Connection, Record
 from pypika import Query
@@ -106,6 +107,7 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         tag: Optional[str] = None,
         seller: Optional[str] = None,
         favorited: Optional[str] = None,
+        title: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
         requested_user: Optional[User] = None,
@@ -194,6 +196,17 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
                         users.id,
                     )
                 ),
+            )
+            # fmt: on
+
+        if title:
+            title_pattern = '%{}%'.format(title)
+            query_params.append(title_pattern)
+            query_params_count += 1
+
+            # fmt: off
+            query = query.where(
+                items.title.like(Parameter(query_params_count)),
             )
             # fmt: on
 
